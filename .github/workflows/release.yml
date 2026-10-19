@@ -1,8 +1,19 @@
 name: Release
 
+# Three ways to release:
+#  1. Push a tag:            git tag v1.0.0 && git push --tags
+#  2. Publish a release in the GitHub UI (Releases → Draft a new release)
+#  3. Actions → Release → Run workflow, and type the version (e.g. v1.0.0)
 on:
   push:
     tags: ["v*"]
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version tag to release, e.g. v1.0.0"
+        required: true
 
 permissions:
   contents: write
@@ -12,13 +23,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Work out the tag
+        id: tag
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          INPUT_TAG: ${{ inputs.version }}
+        run: |
+          TAG="${RELEASE_TAG:-${INPUT_TAG:-$GITHUB_REF_NAME}}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Releasing $TAG"
+
       - name: Package skill for Claude.ai upload
         run: |
           cd skills
           zip -r ../senior-tester-skill.zip senior-tester -x '*/__pycache__/*'
-      - name: Create release
+
+      - name: Create release or attach zip
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.tag.outputs.tag }}
         run: |
-          gh release create "$GITHUB_REF_NAME" senior-tester-skill.zip \
-            --title "$GITHUB_REF_NAME" --notes-file CHANGELOG.md
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" senior-tester-skill.zip --clobber
+          else
+            gh release create "$TAG" senior-tester-skill.zip \
+              --target "$GITHUB_SHA" --title "$TAG" --notes-file CHANGELOG.md
+          fi

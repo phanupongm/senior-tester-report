@@ -34,4 +34,4 @@ python3 skills/senior-tester/scripts/build_report.py examples/findings.json exam
 
 ## Releases
 
-Bump `version` in `.claude-plugin/plugin.json` and `VERSION` in `build_report.py`, update `CHANGELOG.md`, then push a tag `vX.Y.Z`. The release workflow attaches `senior-tester-skill.zip` for Claude.ai users.
+Bump `version` in `.claude-plugin/plugin.json` and `VERSION` in `build_report.py` and update `CHANGELOG.md`. Then either push a tag `vX.Y.Z`, publish a release in the GitHub UI, or run **Actions → Release → Run workflow**. The release workflow attaches `senior-tester-skill.zip` for Claude.ai users.
