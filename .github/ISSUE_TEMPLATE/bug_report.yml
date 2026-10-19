@@ -1,0 +1,34 @@
+name: Bug report
+description: Something in the skill, scanner or report doesn't work as described
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, what you got.
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where
+      options:
+        - Claude Code plugin
+        - Claude Code skill (manual install)
+        - Claude.ai / desktop app
+        - scan_repo.py on its own
+        - build_report.py on its own
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: OS and Python version
+      placeholder: macOS 15, Python 3.12
+  - type: textarea
+    id: logs
+    attributes:
+      label: Output or error
+      description: Remove secrets, real user data and private URLs first.
+      render: text

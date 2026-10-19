@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/phanupongm/senior-tester-report/schema/findings.schema.json",
+  "title": "senior-tester findings",
+  "type": "object",
+  "required": ["meta", "summary", "scores", "findings"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "system": { "type": "string" },
+        "version": { "type": "string" },
+        "date": { "type": "string" },
+        "mode": { "enum": ["full", "code", "live", "quick", "retest"] },
+        "repo": { "type": "string" },
+        "url": { "type": "string" },
+        "language": { "type": "string" },
+        "scope_notes": { "type": "string" },
+        "personas": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "summary": { "type": "string" },
+    "scores": {
+      "type": "object",
+      "required": ["functionality", "security", "usability", "mobile", "performance", "code_quality", "accessibility"],
+      "additionalProperties": false,
+      "patternProperties": {
+        "^(functionality|security|usability|mobile|performance|code_quality|accessibility)$": {
+          "type": "object",
+          "required": ["score"],
+          "properties": {
+            "score": { "type": "number", "minimum": 0, "maximum": 10 },
+            "why": { "type": "string" }
+          }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "area", "severity"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[FSUMPCA]-[A-Za-z0-9-]+$" },
+          "title": { "type": "string" },
+          "area": { "enum": ["functionality", "security", "usability", "mobile", "performance", "code_quality", "accessibility"] },
+          "severity": { "enum": ["Critical", "High", "Medium", "Low", "Info"] },
+          "confidence": { "enum": ["confirmed", "suspected"] },
+          "persona": { "type": "string" },
+          "owasp": { "type": "string", "pattern": "^(A(0[1-9]|10)|SECRETS|PRIVACY)$" },
+          "cwe": { "type": "string" },
+          "location": { "type": "string" },
+          "locations": { "type": "array", "items": { "type": "string" } },
+          "url": { "type": "string" },
+          "steps": { "type": "array", "items": { "type": "string" } },
+          "expected": { "type": "string" },
+          "actual": { "type": "string" },
+          "evidence": { "type": "string" },
+          "screenshot": { "type": "string" },
+          "fix": { "type": "string" },
+          "fix_code": { "type": "string" }
+        }
+      }
+    },
+    "journeys": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["persona", "goal", "result"],
+        "properties": {
+          "persona": { "type": "string" },
+          "goal": { "type": "string" },
+          "result": { "enum": ["success", "struggled", "stuck", "failed"] },
+          "attempts": { "type": "integer", "minimum": 0 },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["item", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "item": { "type": "string" },
+          "status": { "enum": ["pass", "fail", "na", "unchecked"] },
+          "ref": { "type": "string" }
+        }
+      }
+    },
+    "ideas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title"],
+        "properties": {
+          "title": { "type": "string" },
+          "why": { "type": "string" },
+          "effort": { "enum": ["S", "M", "L"] },
+          "impact": { "enum": ["Low", "Med", "High"] }
+        }
+      }
+    }
+  }
+}

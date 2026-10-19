@@ -1,0 +1,22 @@
+name: Stack playbook or scanner pattern
+description: Suggest support for a stack, a route/secret/risky-code pattern, or a false positive to fix
+labels: [enhancement]
+body:
+  - type: input
+    id: stack
+    attributes:
+      label: Stack / framework
+      placeholder: e.g. Remix, Phoenix, Hono, Django Ninja
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Example code
+      description: A small snippet showing the route definition, auth check, or pattern. No real secrets.
+      render: text
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it matters
+      description: The real-world bug this would catch, or the false positive it causes today.

@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.9", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Build example report
+        run: |
+          python skills/senior-tester/scripts/build_report.py examples/findings.json /tmp/qa-report.html \
+            --previous examples/previous-findings.json --md /tmp/qa-report.md --sarif /tmp/qa-findings.sarif
+      - name: Scanner smoke test on this repo
+        run: python skills/senior-tester/scripts/scan_repo.py . --out /tmp/recon
+
+  plugin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate plugin and marketplace
+        run: npx -y @anthropic-ai/claude-code plugin validate .

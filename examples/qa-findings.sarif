@@ -1,0 +1,314 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "senior-tester",
+          "version": "1.0.0",
+          "informationUri": "https://github.com/phanupongm/senior-tester-report",
+          "rules": [
+            {
+              "id": "S-001",
+              "name": "StudentsCanReadOtherStudentsResultsByChangingTheId",
+              "shortDescription": {
+                "text": "Students can read other students' results by changing the ID"
+              },
+              "fullDescription": {
+                "text": "200 OK with another student's data"
+              },
+              "help": {
+                "text": "Load the result scoped to the logged-in user, or check ownership before returning it. Apply the same check in answers.ts.",
+                "markdown": "Load the result scoped to the logged-in user, or check ownership before returning it. Apply the same check in answers.ts.\n\n```\nconst result = await db.result.findFirst({\n  where: { id: req.params.id, studentId: req.user.id },\n});\nif (!result) return res.sendStatus(404);\n```"
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "A01",
+                  "CWE-639",
+                  "security"
+                ],
+                "precision": "high",
+                "security-severity": "9.5"
+              }
+            },
+            {
+              "id": "M-001",
+              "name": "SubmitButtonHiddenBehindTheBottomNavigationOnIos",
+              "shortDescription": {
+                "text": "Submit button hidden behind the bottom navigation on iOS"
+              },
+              "fullDescription": {
+                "text": "Button covered by the navigation bar"
+              },
+              "help": {
+                "text": "Reserve space for the fixed bar and the iOS safe area.",
+                "markdown": "Reserve space for the fixed bar and the iOS safe area.\n\n```\n.exam-body { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }\n```"
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "mobile"
+                ],
+                "precision": "high"
+              }
+            },
+            {
+              "id": "F-001",
+              "name": "ExcelExportGarblesNonAsciiFilenames",
+              "shortDescription": {
+                "text": "Excel export garbles non-ASCII filenames"
+              },
+              "fullDescription": {
+                "text": "Excel export garbles non-ASCII filenames"
+              },
+              "help": {
+                "text": "Send the filename with RFC 5987 encoding.",
+                "markdown": "Send the filename with RFC 5987 encoding.\n\n```\nres.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(name)}`);\n```"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "functionality"
+                ],
+                "precision": "high"
+              }
+            },
+            {
+              "id": "S-002",
+              "name": "NoRateLimitOnLogin",
+              "shortDescription": {
+                "text": "No rate limit on login"
+              },
+              "fullDescription": {
+                "text": "No rate limit on login"
+              },
+              "help": {
+                "text": "Limit login attempts per IP and per account (e.g. 5 per minute) with express-rate-limit.",
+                "markdown": "Limit login attempts per IP and per account (e.g. 5 per minute) with express-rate-limit."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "A04",
+                  "CWE-307",
+                  "security"
+                ],
+                "precision": "medium",
+                "security-severity": "5.5"
+              }
+            },
+            {
+              "id": "A-001",
+              "name": "EditAndDeleteIconButtonsHaveNoAccessibleName",
+              "shortDescription": {
+                "text": "Edit and delete icon buttons have no accessible name"
+              },
+              "fullDescription": {
+                "text": "Edit and delete icon buttons have no accessible name"
+              },
+              "help": {
+                "text": "Add aria-label=\"Edit\" / aria-label=\"Delete\".",
+                "markdown": "Add aria-label=\"Edit\" / aria-label=\"Delete\"."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "tags": [
+                  "accessibility"
+                ],
+                "precision": "high"
+              }
+            },
+            {
+              "id": "P-001",
+              "name": "ResultsPageLoadsEachStudentSScoreWithASeparateRequest",
+              "shortDescription": {
+                "text": "Results page loads each student's score with a separate request"
+              },
+              "fullDescription": {
+                "text": "Results page loads each student's score with a separate request"
+              },
+              "help": {
+                "text": "Fetch all results for the exam in one request.",
+                "markdown": "Fetch all results for the exam in one request."
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "tags": [
+                  "performance"
+                ],
+                "precision": "high"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "S-001",
+          "level": "error",
+          "message": {
+            "text": "Students can read other students' results by changing the ID — Steps: Log in as student1@test.local → Request GET /api/results/124 (owned by student2) → Response is 200 with student2's score and answers"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/routes/results.ts",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 42
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/routes/answers.ts",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 18
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "seniorTesterId/v1": "S-001"
+          }
+        },
+        {
+          "ruleId": "M-001",
+          "level": "error",
+          "message": {
+            "text": "Submit button hidden behind the bottom navigation on iOS — Steps: Open an exam at 390 px width (iPhone viewport) → Scroll to the last question → The Submit button sits under the fixed bottom bar and can't be tapped"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/components/ExamFooter.tsx",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 9
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "seniorTesterId/v1": "M-001"
+          }
+        },
+        {
+          "ruleId": "F-001",
+          "level": "warning",
+          "message": {
+            "text": "Excel export garbles non-ASCII filenames — Steps: Create an exam named \"Économie 101\" → Export scores to Excel → Downloaded file is named \"_conomie 101.xlsx\""
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/export.ts",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 18
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "seniorTesterId/v1": "F-001"
+          }
+        },
+        {
+          "ruleId": "S-002",
+          "level": "warning",
+          "message": {
+            "text": "No rate limit on login"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/routes/auth.ts",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 12
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "seniorTesterId/v1": "S-002"
+          }
+        },
+        {
+          "ruleId": "A-001",
+          "level": "note",
+          "message": {
+            "text": "Edit and delete icon buttons have no accessible name"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/components/Toolbar.tsx",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 9
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "seniorTesterId/v1": "A-001"
+          }
+        },
+        {
+          "ruleId": "P-001",
+          "level": "note",
+          "message": {
+            "text": "Results page loads each student's score with a separate request"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/pages/results.tsx",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 31
+                }
+              }
+            }
+          ],
+          "partialFingerprints": {
+            "seniorTesterId/v1": "P-001"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,140 @@
+{
+  "meta": {
+    "system": "Acme Exams (demo)",
+    "version": "a1b2c3d",
+    "date": "2026-10-19",
+    "mode": "full",
+    "repo": "github.com/acme/exams",
+    "url": "http://localhost:3000",
+    "language": "en",
+    "scope_notes": "Fictional data to demonstrate the report. Tested on localhost with seeded accounts for student, teacher and admin. File upload and email delivery were not tested.",
+    "personas": ["First-timer", "Mobile user", "Intruder", "Admin"]
+  },
+  "summary": "The core exam flow works, but one access-control bug lets any student read every other student's results — fix that before launch. On phones, the submit button is hidden behind the bottom bar, so mobile students can get stuck at the end of an exam.",
+  "scores": {
+    "functionality": { "score": 7, "why": "F-001 export garbles non-ASCII filenames; everything else correct" },
+    "security": { "score": 0, "why": "S-001 IDOR on results API (Critical); S-002 no login rate limit (suspected)" },
+    "usability": { "score": 6, "why": "U-001 no save confirmation; first-timer needed 3 tries to join an exam" },
+    "mobile": { "score": 4, "why": "M-001 submit button unreachable on iOS Safari" },
+    "performance": { "score": 8, "why": "Pages load < 1 s locally; P-001 results page makes 40 sequential requests" },
+    "code_quality": { "score": 5, "why": "C-001 no tests for access control; errors swallowed in 3 handlers" },
+    "accessibility": { "score": 6, "why": "A-001 icon-only buttons without labels" }
+  },
+  "findings": [
+    {
+      "id": "S-001",
+      "title": "Students can read other students' results by changing the ID",
+      "area": "security",
+      "severity": "Critical",
+      "confidence": "confirmed",
+      "persona": "Intruder",
+      "owasp": "A01",
+      "cwe": "CWE-639",
+      "location": "src/routes/results.ts:42",
+      "locations": ["src/routes/results.ts:42", "src/routes/answers.ts:18"],
+      "url": "/api/results/124",
+      "steps": [
+        "Log in as student1@test.local",
+        "Request GET /api/results/124 (owned by student2)",
+        "Response is 200 with student2's score and answers"
+      ],
+      "expected": "403 Forbidden",
+      "actual": "200 OK with another student's data",
+      "evidence": "{\"studentId\": 2, \"score\": 87, \"answers\": [...]}",
+      "fix": "Load the result scoped to the logged-in user, or check ownership before returning it. Apply the same check in answers.ts.",
+      "fix_code": "const result = await db.result.findFirst({\n  where: { id: req.params.id, studentId: req.user.id },\n});\nif (!result) return res.sendStatus(404);"
+    },
+    {
+      "id": "M-001",
+      "title": "Submit button hidden behind the bottom navigation on iOS",
+      "area": "mobile",
+      "severity": "High",
+      "confidence": "confirmed",
+      "persona": "Mobile user",
+      "url": "/exam/12",
+      "location": "src/components/ExamFooter.tsx:9",
+      "steps": [
+        "Open an exam at 390 px width (iPhone viewport)",
+        "Scroll to the last question",
+        "The Submit button sits under the fixed bottom bar and can't be tapped"
+      ],
+      "expected": "Submit button fully visible and tappable",
+      "actual": "Button covered by the navigation bar",
+      "fix": "Reserve space for the fixed bar and the iOS safe area.",
+      "fix_code": ".exam-body { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }"
+    },
+    {
+      "id": "F-001",
+      "title": "Excel export garbles non-ASCII filenames",
+      "area": "functionality",
+      "severity": "Medium",
+      "confidence": "confirmed",
+      "persona": "Admin",
+      "location": "src/export.ts:18",
+      "steps": ["Create an exam named \"Économie 101\"", "Export scores to Excel", "Downloaded file is named \"_conomie 101.xlsx\""],
+      "fix": "Send the filename with RFC 5987 encoding.",
+      "fix_code": "res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(name)}`);"
+    },
+    {
+      "id": "S-002",
+      "title": "No rate limit on login",
+      "area": "security",
+      "severity": "Medium",
+      "confidence": "suspected",
+      "owasp": "A04",
+      "cwe": "CWE-307",
+      "location": "src/routes/auth.ts:12",
+      "fix": "Limit login attempts per IP and per account (e.g. 5 per minute) with express-rate-limit."
+    },
+    {
+      "id": "P-001",
+      "title": "Results page loads each student's score with a separate request",
+      "area": "performance",
+      "severity": "Low",
+      "confidence": "confirmed",
+      "location": "src/pages/results.tsx:31",
+      "fix": "Fetch all results for the exam in one request."
+    },
+    {
+      "id": "U-001",
+      "title": "No confirmation after saving an answer",
+      "area": "usability",
+      "severity": "Low",
+      "confidence": "confirmed",
+      "persona": "First-timer",
+      "url": "/exam/12",
+      "fix": "Show a short \"Saved\" status next to the question after each save."
+    },
+    {
+      "id": "A-001",
+      "title": "Edit and delete icon buttons have no accessible name",
+      "area": "accessibility",
+      "severity": "Low",
+      "confidence": "confirmed",
+      "location": "src/components/Toolbar.tsx:9",
+      "fix": "Add aria-label=\"Edit\" / aria-label=\"Delete\"."
+    }
+  ],
+  "journeys": [
+    { "persona": "First-timer", "goal": "Log in and join an exam", "result": "struggled", "attempts": 3, "note": "Join-code field is below the fold" },
+    { "persona": "Mobile user", "goal": "Answer and submit an exam", "result": "stuck", "attempts": 5, "note": "M-001" },
+    { "persona": "Intruder", "goal": "See data that isn't theirs", "result": "success", "note": "S-001 — the intruder succeeding is a failure for the app" },
+    { "persona": "Admin", "goal": "Create an exam and export scores", "result": "success", "attempts": 1, "note": "F-001 on export filename" }
+  ],
+  "checks": [
+    { "id": "A01", "item": "Ownership check on every record route", "status": "fail", "ref": "S-001" },
+    { "id": "A01", "item": "Admin APIs reject normal users", "status": "pass" },
+    { "id": "A02", "item": "Passwords hashed with bcrypt", "status": "pass" },
+    { "id": "A03", "item": "Parameterized queries only", "status": "pass" },
+    { "id": "A03", "item": "Markup probe renders as text", "status": "pass" },
+    { "id": "A04", "item": "Rate limit on login", "status": "fail", "ref": "S-002" },
+    { "id": "A05", "item": "Security headers present", "status": "unchecked" },
+    { "id": "SECRETS", "item": "No secrets committed", "status": "pass" }
+  ],
+  "ideas": [
+    { "title": "Automated access-control tests", "why": "A small test per API route asserting 403 for other users would have caught S-001 before release.", "effort": "S", "impact": "High" },
+    { "title": "Autosave answers every 30 seconds", "why": "Mobile users on flaky connections risk losing answers; the Mobile user persona dropped connection twice.", "effort": "M", "impact": "High" },
+    { "title": "3-step \"how to join\" hint on the home page", "why": "The First-timer needed 3 attempts to find the join code field.", "effort": "S", "impact": "Med" },
+    { "title": "Audit log for admin actions", "why": "Admins can delete exams with no trace of who did it.", "effort": "M", "impact": "Med" }
+  ]
+}

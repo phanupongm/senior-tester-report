@@ -1,0 +1,12 @@
+{
+  "name": "senior-tester",
+  "version": "1.0.0",
+  "description": "A senior QA engineer and security reviewer for your web app: reads your code, drives the running site as simulated users, scores every area and hands you an actionable HTML report.",
+  "author": {
+    "name": "phanupongm"
+  },
+  "homepage": "https://github.com/phanupongm/senior-tester-report",
+  "repository": "https://github.com/phanupongm/senior-tester-report",
+  "license": "MIT",
+  "keywords": ["qa", "testing", "security", "audit", "owasp", "ux", "report"]
+}

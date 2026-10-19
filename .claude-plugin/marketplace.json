@@ -1,0 +1,14 @@
+{
+  "name": "senior-tester",
+  "description": "Senior QA + security review for web apps, as a Claude skill",
+  "owner": {
+    "name": "phanupongm"
+  },
+  "plugins": [
+    {
+      "name": "senior-tester",
+      "source": "./",
+      "description": "Code review + live persona testing + security checklist, scored and delivered as an HTML report"
+    }
+  ]
+}
